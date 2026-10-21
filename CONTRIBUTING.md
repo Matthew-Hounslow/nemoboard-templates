@@ -16,7 +16,7 @@ The [file format](https://nemoboard.com/docs/file-format.html) is plain markdown
 
 - `templates/<name>/`: the boards, with the top board as `index.nemo.md`. The folder name is lowercase words joined by dashes (`incident-review`). The top board's `# Title` is the name the project gets when it's imported.
 - `previews/<name>.png`: the picture of the top board.
-- A row for it in the table in `README.md`, with its download link: `https://github.com/Matthew-Hounslow/nemoboard-templates/releases/download/templates/<name>.zip`.
+- A row for it in the table in `README.md`, with its two links: **Open in nemoboard** (`https://nemoboard.com/?template=<name>`) and **Download .zip** (`https://github.com/Matthew-Hounslow/nemoboard-templates/releases/download/templates/<name>.zip`).
 - Pictures used by image cards go in `templates/<name>/images/`. Nothing else in the folder is imported, so leave other files out.
 
 Then open a pull request. A check runs on it (`node scripts/check.mjs`, which you can also run yourself, with nothing to install) and says what to fix if a board wouldn't open cleanly. Once the pull request is merged, the template's `.zip` appears on the [templates release](https://github.com/Matthew-Hounslow/nemoboard-templates/releases/tag/templates) within a minute or two.
