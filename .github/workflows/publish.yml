@@ -1,0 +1,39 @@
+name: Publish templates
+
+# On every change to main: check the templates, zip each one (in a folder named after its top board, which nemoboard
+# names the project after) and put the .zip files on the "templates" release, where the README's download links point.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check.mjs
+      - name: Zip each template
+        run: |
+          mkdir -p out
+          for dir in templates/*/; do
+            slug=$(basename "$dir")
+            title=$(sed -n 's/^# //p' "$dir/index.nemo.md" | head -1)
+            tmp=$(mktemp -d)
+            mkdir -p "$tmp/$title"
+            (cd "$dir" && find . -type f \( -name '*.nemo.md' -o -path './images/*' \) -exec cp --parents {} "$tmp/$title/" \;)
+            (cd "$tmp" && zip -qr "$GITHUB_WORKSPACE/out/$slug.zip" "$title")
+          done
+          ls -l out
+      - name: Put them on the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view templates >/dev/null 2>&1 || gh release create templates --title "Templates" --notes "Each template as a .zip, for nemoboard's Import ▸ .zip file…. Updated whenever main changes."
+          gh release upload templates out/*.zip --clobber
