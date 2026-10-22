@@ -9,6 +9,8 @@ const SHAPES = ['process', 'decision', 'terminator', 'data', 'document', 'databa
 const COLORS = ['slate', 'blue', 'teal', 'green', 'amber', 'red', 'violet', 'pink'];
 const ARROWS = ['<-->', '<->', '-->', '-.-', '---', '->'];
 const ROUTES = ['orthogonal', 'curved', 'straight'];
+/** The side of its card each end meets, for `{start=… end=…}` (left out, nemoboard picks the side facing the other card). */
+const SIDES = ['top', 'right', 'bottom', 'left'];
 const SIZES = { process: [200, 84], decision: [150, 150], terminator: [180, 64], data: [200, 84], document: [200, 96], database: [160, 110], burst: [170, 110], note: [260, 200], frame: [480, 320], text: [220, 40], port: [140, 40], image: [240, 180] };
 
 const problems = [];
@@ -94,8 +96,13 @@ function checkBoard(file, template) {
     const [, from, arrow, to, , opts] = m;
     if (!ARROWS.includes(arrow)) say(`\`${arrow}\` isn’t a connection (one of ${ARROWS.join(' ')})`, i + 1);
     for (const end of [from, to]) if (!cards.has(end)) say(`the connection names \`${end}\`, which isn’t a card on this board`, i + 1);
-    const route = opts && attrs(opts).route;
-    if (opts && !ROUTES.includes(route)) say(`\`{${opts}}\` should be \`{route=${ROUTES.join('|')}}\``, i + 1);
+    if (!opts) continue;
+    const o = attrs(opts);
+    for (const [k, v] of Object.entries(o)) {
+      if (k === 'route' && !ROUTES.includes(v)) say(`\`route=${v}\` should be one of ${ROUTES.join(', ')}`, i + 1);
+      else if ((k === 'start' || k === 'end') && !SIDES.includes(v)) say(`\`${k}=${v}\` should be one of ${SIDES.join(', ')}`, i + 1);
+      else if (!['route', 'start', 'end'].includes(k)) say(`\`{${opts}}\`: a connection takes \`route=\`, \`start=\` and \`end=\``, i + 1);
+    }
   }
 }
 
